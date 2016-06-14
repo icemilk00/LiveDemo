@@ -1,0 +1,15 @@
+PODS:
+  - GPUImage (0.1.7)
+  - TheAmazingAudioEngine (1.5.6)
+
+DEPENDENCIES:
+  - GPUImage (~> 0.1)
+  - TheAmazingAudioEngine (~> 1.5)
+
+SPEC CHECKSUMS:
+  GPUImage: 733a5f0fab92df9de1c37ba9df520a833ccb406d
+  TheAmazingAudioEngine: 0ed8c05486646373a48b22a341d31de42d1af2c3
+
+PODFILE CHECKSUM: 0976b4319279ba132c7d36c03dc72e2bd19575e6
+
+COCOAPODS: 1.0.1

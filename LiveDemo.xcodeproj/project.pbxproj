@@ -16,6 +16,7 @@
 		E693A3B01CF7EA0F004AC1B8 /* LiveRecordViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E693A3AF1CF7EA0F004AC1B8 /* LiveRecordViewController.m */; };
 		E693A3B21CF7EA40004AC1B8 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E693A3B11CF7EA40004AC1B8 /* AVFoundation.framework */; };
 		E693A49D1CF846DF004AC1B8 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E693A49C1CF846DF004AC1B8 /* VideoToolbox.framework */; };
+		ED8AE2B2CFA38353437096DA /* libPods-LiveDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EBD8130D3E98C961D8DEF5C /* libPods-LiveDemo.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +37,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0E12166929FCCA46E5E24987 /* Pods-LiveDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LiveDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LiveDemo/Pods-LiveDemo.debug.xcconfig"; sourceTree = "<group>"; };
+		265E2FC16633D4223030538C /* Pods-LiveDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LiveDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-LiveDemo/Pods-LiveDemo.release.xcconfig"; sourceTree = "<group>"; };
+		2EBD8130D3E98C961D8DEF5C /* libPods-LiveDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LiveDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E693A3931CF7E95A004AC1B8 /* LiveDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiveDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E693A3971CF7E95A004AC1B8 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E693A3991CF7E95A004AC1B8 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -60,19 +64,39 @@
 			files = (
 				E693A49D1CF846DF004AC1B8 /* VideoToolbox.framework in Frameworks */,
 				E693A3B21CF7EA40004AC1B8 /* AVFoundation.framework in Frameworks */,
+				ED8AE2B2CFA38353437096DA /* libPods-LiveDemo.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		E693A38A1CF7E95A004AC1B8 = {
+		7C456A6D653EEB2137431374 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				E693A49C1CF846DF004AC1B8 /* VideoToolbox.framework */,
 				E693A3B11CF7EA40004AC1B8 /* AVFoundation.framework */,
+				2EBD8130D3E98C961D8DEF5C /* libPods-LiveDemo.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8CCBA05967D330A93D970797 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				0E12166929FCCA46E5E24987 /* Pods-LiveDemo.debug.xcconfig */,
+				265E2FC16633D4223030538C /* Pods-LiveDemo.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		E693A38A1CF7E95A004AC1B8 = {
+			isa = PBXGroup;
+			children = (
 				E693A3951CF7E95A004AC1B8 /* LiveDemo */,
 				E693A3941CF7E95A004AC1B8 /* Products */,
+				8CCBA05967D330A93D970797 /* Pods */,
+				7C456A6D653EEB2137431374 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -135,9 +159,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E693A3AA1CF7E95A004AC1B8 /* Build configuration list for PBXNativeTarget "LiveDemo" */;
 			buildPhases = (
+				A0394F0E0DC59F0F2FC47466 /* [CP] Check Pods Manifest.lock */,
 				E693A38F1CF7E95A004AC1B8 /* Sources */,
 				E693A3901CF7E95A004AC1B8 /* Frameworks */,
 				E693A3911CF7E95A004AC1B8 /* Resources */,
+				90507018D50534C3F58EDDC5 /* [CP] Embed Pods Frameworks */,
+				8748F748B70B808CCAEE47F6 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -216,6 +243,54 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8748F748B70B808CCAEE47F6 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LiveDemo/Pods-LiveDemo-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		90507018D50534C3F58EDDC5 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LiveDemo/Pods-LiveDemo-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A0394F0E0DC59F0F2FC47466 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E693A38F1CF7E95A004AC1B8 /* Sources */ = {
@@ -335,6 +410,7 @@
 		};
 		E693A3AB1CF7E95A004AC1B8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0E12166929FCCA46E5E24987 /* Pods-LiveDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -348,6 +424,7 @@
 		};
 		E693A3AC1CF7E95A004AC1B8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 265E2FC16633D4223030538C /* Pods-LiveDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -378,6 +455,7 @@
 				E693A3AC1CF7E95A004AC1B8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

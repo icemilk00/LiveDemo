@@ -11,6 +11,7 @@
 
 @interface LiveRecordViewController () 
 {
+    /*
     AVCaptureSession *_avSession;
     dispatch_queue_t _videoQueue;
     AVCaptureVideoDataOutput *_videoOutput;
@@ -18,6 +19,7 @@
     AVCaptureConnection *_audioConnection;
     
     AVCaptureVideoPreviewLayer *_previewLayer;
+     */
 }
 @end
 
@@ -26,9 +28,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [self beginLive];
+    
 }
 
+@end
+
+
+/*
 -(void)beginLive
 {
     _avSession = [[AVCaptureSession alloc] init];
@@ -93,4 +99,4 @@
 }
 */
 
-@end
+
