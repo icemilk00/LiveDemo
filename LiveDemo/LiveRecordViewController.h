@@ -9,7 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <VideoToolbox/VideoToolbox.h>
+#import <GPUImage/GPUImage.h>
 
-@interface LiveRecordViewController : UIViewController <AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface LiveRecordViewController : UIViewController <GPUImageVideoCameraDelegate>
 
 @end

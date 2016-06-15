@@ -7,6 +7,7 @@
 //
 
 #import "LiveRecordViewController.h"
+#import "H264HwEncoderImpl.h"
 
 
 @interface LiveRecordViewController () 
@@ -20,6 +21,8 @@
     
     AVCaptureVideoPreviewLayer *_previewLayer;
      */
+    GPUImageVideoCamera *videoCamera;
+    H264HwEncoderImpl *h264Encoder;
 }
 @end
 
@@ -29,6 +32,36 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
+    [self configVideoCamera];
+    [self configH264Encoder];
+    
+}
+
+-(void)configVideoCamera
+{
+    videoCamera = [[GPUImageVideoCamera alloc] initWithSessionPreset:AVCaptureSessionPresetHigh cameraPosition:AVCaptureDevicePositionBack];
+    videoCamera.delegate = self;
+    videoCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
+    
+    GPUImageHighlightShadowFilter *customFilter = [[GPUImageHighlightShadowFilter alloc] init];
+    GPUImageView *filteredVideoView = [[GPUImageView alloc] initWithFrame:self.view.bounds];
+    
+    [videoCamera addTarget:customFilter];
+    [customFilter addTarget:filteredVideoView];
+    
+    [videoCamera startCameraCapture];
+    
+    [self.view addSubview:filteredVideoView];
+}
+
+-(void)configH264Encoder
+{
+    h264Encoder = [[H264HwEncoderImpl alloc] init];
+}
+
+- (void)willOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+{
+    NSLog(@"sampleBuffer = %@",sampleBuffer);
 }
 
 @end
