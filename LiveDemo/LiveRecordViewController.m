@@ -8,9 +8,10 @@
 
 #import "LiveRecordViewController.h"
 #import "H264HwEncoderImpl.h"
+#import "VVAudioEncoder.h"
 
 
-@interface LiveRecordViewController () 
+@interface LiveRecordViewController () <H264HwEncoderImplDelegate>
 {
     /*
     AVCaptureSession *_avSession;
@@ -23,6 +24,10 @@
      */
     GPUImageVideoCamera *videoCamera;
     H264HwEncoderImpl *h264Encoder;
+    VVAudioEncoder *audioEncoder;
+    
+    NSMutableData *_audioEncodedData;
+    NSMutableData *_videoEncodedData;
 }
 @end
 
@@ -31,10 +36,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
-    [self configVideoCamera];
+    _audioEncodedData = [[NSMutableData alloc] init];
+    _videoEncodedData = [[NSMutableData alloc] init];
     [self configH264Encoder];
-    
+    [self configAudioEncoder];
+    [self configVideoCamera];
 }
 
 -(void)configVideoCamera
@@ -49,6 +55,12 @@
     [videoCamera addTarget:customFilter];
     [customFilter addTarget:filteredVideoView];
     
+    [videoCamera addAudioInputsAndOutputs];
+    
+    [h264Encoder initEncode:480 height:640];
+    h264Encoder.delegate = self;
+    
+    
     [videoCamera startCameraCapture];
     
     [self.view addSubview:filteredVideoView];
@@ -57,11 +69,65 @@
 -(void)configH264Encoder
 {
     h264Encoder = [[H264HwEncoderImpl alloc] init];
+    [h264Encoder initWithConfiguration];
 }
 
-- (void)willOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+-(void)configAudioEncoder
 {
-    NSLog(@"sampleBuffer = %@",sampleBuffer);
+    audioEncoder = [[VVAudioEncoder alloc] init];
+}
+
+- (void)willOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer andType:(GPUImageMediaType)mediaType
+{
+    
+    NSLog(@"================================\nsampleBuffer = %@",sampleBuffer);
+    if (mediaType == MediaTypeAudio) {
+        [audioEncoder encodeSampleBuffer:sampleBuffer completeBlock:^(NSData *encodedData, NSError *error) {
+            if (encodedData) {
+                
+                NSLog(@"Audio data (%lu): %@", (unsigned long)encodedData.length, encodedData.description);
+                [_audioEncodedData appendData:encodedData];
+                
+            } else {
+                NSLog(@"Error encoding AAC: %@", error);
+            }
+        }];
+    }
+    else if (mediaType == MediaTypeVideo)
+    {
+        [h264Encoder encode:sampleBuffer];
+    }
+}
+
+- (void)gotSpsPps:(NSData*)sps pps:(NSData*)pps
+{
+    
+    const char bytes[] = "\x00\x00\x00\x01";
+    size_t length = (sizeof bytes) - 1; //string literals have implicit trailing '\0'
+    NSData *ByteHeader = [NSData dataWithBytes:bytes length:length];
+    [_videoEncodedData appendData:ByteHeader];
+    [_videoEncodedData appendData:sps];
+    [_videoEncodedData appendData:ByteHeader];
+    [_videoEncodedData appendData:pps];
+}
+
+#pragma mark
+#pragma mark - 视频数据回调
+- (void)gotEncodedData:(NSData*)data isKeyFrame:(BOOL)isKeyFrame
+{
+    NSLog(@"Video data (%lu): %@", (unsigned long)data.length, data.description);
+    const char bytes[] = "\x00\x00\x00\x01";
+    size_t length = (sizeof bytes) - 1; //string literals have implicit trailing '\0'
+    NSData *ByteHeader = [NSData dataWithBytes:bytes length:length];
+    
+    [_videoEncodedData appendData:ByteHeader];
+    [_videoEncodedData appendData:data];
+
+}
+
+-(void)dealloc
+{
+//    [h264Encoder End];
 }
 
 @end

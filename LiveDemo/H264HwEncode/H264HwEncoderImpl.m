@@ -298,7 +298,7 @@ CMSampleBufferRef sampleBuffer )
 {
      dispatch_sync(aQueue, ^{
         
-          frameCount++;
+            frameCount++;
             // Get the CV Image buffer
             CVImageBufferRef imageBuffer = (CVImageBufferRef)CMSampleBufferGetImageBuffer(sampleBuffer);
             

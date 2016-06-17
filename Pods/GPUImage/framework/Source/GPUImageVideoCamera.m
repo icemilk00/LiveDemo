@@ -943,6 +943,10 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
     }
     else if (captureOutput == audioOutput)
     {
+        if (self.delegate)
+        {
+            [self.delegate willOutputSampleBuffer:sampleBuffer andType:MediaTypeAudio];
+        }
         [self processAudioSampleBuffer:sampleBuffer];
     }
     else
@@ -957,7 +961,7 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
             //Feature Detection Hook.
             if (self.delegate)
             {
-                [self.delegate willOutputSampleBuffer:sampleBuffer];
+                [self.delegate willOutputSampleBuffer:sampleBuffer andType:MediaTypeVideo];
             }
             
             [self processVideoSampleBuffer:sampleBuffer];

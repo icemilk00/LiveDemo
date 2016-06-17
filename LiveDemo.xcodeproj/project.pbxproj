@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E61D3FB31D13D06D0073055B /* VVAudioEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = E61D3FB21D13D06D0073055B /* VVAudioEncoder.m */; };
 		E65EE06A1D112C03007E7529 /* H264HwEncoderImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = E65EE0691D112C03007E7529 /* H264HwEncoderImpl.m */; };
 		E693A3981CF7E95A004AC1B8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E693A3971CF7E95A004AC1B8 /* main.m */; };
 		E693A39B1CF7E95A004AC1B8 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E693A39A1CF7E95A004AC1B8 /* AppDelegate.m */; };
@@ -41,6 +42,8 @@
 		0E12166929FCCA46E5E24987 /* Pods-LiveDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LiveDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LiveDemo/Pods-LiveDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		265E2FC16633D4223030538C /* Pods-LiveDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LiveDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-LiveDemo/Pods-LiveDemo.release.xcconfig"; sourceTree = "<group>"; };
 		2EBD8130D3E98C961D8DEF5C /* libPods-LiveDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LiveDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E61D3FB11D13D06D0073055B /* VVAudioEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVAudioEncoder.h; sourceTree = "<group>"; };
+		E61D3FB21D13D06D0073055B /* VVAudioEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVAudioEncoder.m; sourceTree = "<group>"; };
 		E65EE0681D112C03007E7529 /* H264HwEncoderImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = H264HwEncoderImpl.h; sourceTree = "<group>"; };
 		E65EE0691D112C03007E7529 /* H264HwEncoderImpl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = H264HwEncoderImpl.m; sourceTree = "<group>"; };
 		E693A3931CF7E95A004AC1B8 /* LiveDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiveDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -93,6 +96,15 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		E61D3FAB1D1395730073055B /* AudioEncoder */ = {
+			isa = PBXGroup;
+			children = (
+				E61D3FB11D13D06D0073055B /* VVAudioEncoder.h */,
+				E61D3FB21D13D06D0073055B /* VVAudioEncoder.m */,
+			);
+			path = AudioEncoder;
+			sourceTree = "<group>";
+		};
 		E65EE0671D112C03007E7529 /* H264HwEncode */ = {
 			isa = PBXGroup;
 			children = (
@@ -123,6 +135,7 @@
 		E693A3951CF7E95A004AC1B8 /* LiveDemo */ = {
 			isa = PBXGroup;
 			children = (
+				E61D3FAB1D1395730073055B /* AudioEncoder */,
 				E65EE0671D112C03007E7529 /* H264HwEncode */,
 				E693A4731CF83882004AC1B8 /* IJKMediaPlayer.xcodeproj */,
 				E693A3AD1CF7E9EE004AC1B8 /* LiveRecord */,
@@ -313,6 +326,7 @@
 				E693A39E1CF7E95A004AC1B8 /* ViewController.m in Sources */,
 				E65EE06A1D112C03007E7529 /* H264HwEncoderImpl.m in Sources */,
 				E693A39B1CF7E95A004AC1B8 /* AppDelegate.m in Sources */,
+				E61D3FB31D13D06D0073055B /* VVAudioEncoder.m in Sources */,
 				E693A3981CF7E95A004AC1B8 /* main.m in Sources */,
 				E693A3B01CF7EA0F004AC1B8 /* LiveRecordViewController.m in Sources */,
 			);

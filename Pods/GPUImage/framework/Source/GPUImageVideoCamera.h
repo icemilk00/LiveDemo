@@ -11,12 +11,20 @@ extern NSString *const kGPUImageYUVVideoRangeConversionForRGFragmentShaderString
 extern NSString *const kGPUImageYUVFullRangeConversionForLAFragmentShaderString;
 extern NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString;
 
+typedef enum
+{
+    MediaTypeAudio = 0,
+    MediaTypeVideo
+    
+}GPUImageMediaType;
 
 //Delegate Protocal for Face Detection.
 @protocol GPUImageVideoCameraDelegate <NSObject>
 
 @optional
 - (void)willOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer;
+- (void)willOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer andType:(GPUImageMediaType)mediaType;
+
 @end
 
 
