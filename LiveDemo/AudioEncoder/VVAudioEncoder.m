@@ -15,10 +15,10 @@
     dispatch_queue_t _encodeQueue;      //编码队列
     dispatch_queue_t _callBackQueue;    //执行回调队列
     
-    size_t _pcmBufferSize;
-    char *_pcmBuffer;
+    size_t *_pcmBuffer;
+    UInt32 _pcmBufferSize;
     
-    uint8_t *_aacBuffer;
+    UInt8 *_aacBuffer;
     UInt32 _aacBufferSize;
 }
 
@@ -119,7 +119,7 @@
     return nil;
 }
 
--(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer completeBlock:(void (^)(NSData *encodeData, NSError *error))completeBlock
+-(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(void (^)(VVAudioEncodeFrame *encodeFrame, NSError *error))completeBlock
 {
     CFRetain(sampleBuffer);
     dispatch_async(_encodeQueue, ^{
@@ -155,18 +155,23 @@
         
         status = AudioConverterFillComplexBuffer(_audioCoverter, incodeDataProc, (__bridge void * _Nullable)(self), &ioOutputDataPacketSize, &outputAudioBufferList, &outputPacketDescription);
         NSData *data = nil;
+        VVAudioEncodeFrame *audioFrame = [[VVAudioEncodeFrame alloc] init];
         if (status == 0) {
             NSData *rawAAC = [NSData dataWithBytes:outputAudioBufferList.mBuffers[0].mData length:outputAudioBufferList.mBuffers[0].mDataByteSize];
             NSData *adtsHeader = [self adtsDataForPacketLength:rawAAC.length];
             NSMutableData *fullData = [NSMutableData dataWithData:adtsHeader];
             [fullData appendData:rawAAC];
             data = fullData;
+            
+            audioFrame.encodeData = data;
+            audioFrame.timeStamp = timeStamp;
+            
         } else {
             error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
         }
         if (completeBlock) {
             dispatch_async(_callBackQueue, ^{
-                completeBlock(data, error);
+                completeBlock(audioFrame, error);
             });
         }
         CFRelease(sampleBuffer);

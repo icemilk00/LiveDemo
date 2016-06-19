@@ -18,6 +18,10 @@
 		E693A3B01CF7EA0F004AC1B8 /* LiveRecordViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E693A3AF1CF7EA0F004AC1B8 /* LiveRecordViewController.m */; };
 		E693A3B21CF7EA40004AC1B8 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E693A3B11CF7EA40004AC1B8 /* AVFoundation.framework */; };
 		E693A49D1CF846DF004AC1B8 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E693A49C1CF846DF004AC1B8 /* VideoToolbox.framework */; };
+		E6B9D20C1D167F3E00EA559D /* VVEncodeFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B9D20B1D167F3E00EA559D /* VVEncodeFrame.m */; };
+		E6B9D20F1D16800100EA559D /* VVAudioEncodeFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B9D20E1D16800100EA559D /* VVAudioEncodeFrame.m */; };
+		E6B9D2121D16803700EA559D /* VVVideoEncodeFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B9D2111D16803700EA559D /* VVVideoEncodeFrame.m */; };
+		E6B9D2151D1683FF00EA559D /* VVVideoEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B9D2141D1683FF00EA559D /* VVVideoEncoder.m */; };
 		ED8AE2B2CFA38353437096DA /* libPods-LiveDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EBD8130D3E98C961D8DEF5C /* libPods-LiveDemo.a */; };
 /* End PBXBuildFile section */
 
@@ -61,6 +65,14 @@
 		E693A3B11CF7EA40004AC1B8 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		E693A4731CF83882004AC1B8 /* IJKMediaPlayer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = IJKMediaPlayer.xcodeproj; path = Player/IJKMediaPlayer.xcodeproj; sourceTree = "<group>"; };
 		E693A49C1CF846DF004AC1B8 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		E6B9D20A1D167F3E00EA559D /* VVEncodeFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVEncodeFrame.h; sourceTree = "<group>"; };
+		E6B9D20B1D167F3E00EA559D /* VVEncodeFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVEncodeFrame.m; sourceTree = "<group>"; };
+		E6B9D20D1D16800100EA559D /* VVAudioEncodeFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVAudioEncodeFrame.h; sourceTree = "<group>"; };
+		E6B9D20E1D16800100EA559D /* VVAudioEncodeFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVAudioEncodeFrame.m; sourceTree = "<group>"; };
+		E6B9D2101D16803700EA559D /* VVVideoEncodeFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVVideoEncodeFrame.h; sourceTree = "<group>"; };
+		E6B9D2111D16803700EA559D /* VVVideoEncodeFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVVideoEncodeFrame.m; sourceTree = "<group>"; };
+		E6B9D2131D1683FF00EA559D /* VVVideoEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVVideoEncoder.h; sourceTree = "<group>"; };
+		E6B9D2141D1683FF00EA559D /* VVVideoEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVVideoEncoder.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +113,8 @@
 			children = (
 				E61D3FB11D13D06D0073055B /* VVAudioEncoder.h */,
 				E61D3FB21D13D06D0073055B /* VVAudioEncoder.m */,
+				E6B9D20D1D16800100EA559D /* VVAudioEncodeFrame.h */,
+				E6B9D20E1D16800100EA559D /* VVAudioEncodeFrame.m */,
 			);
 			path = AudioEncoder;
 			sourceTree = "<group>";
@@ -108,8 +122,12 @@
 		E65EE0671D112C03007E7529 /* H264HwEncode */ = {
 			isa = PBXGroup;
 			children = (
+				E6B9D2131D1683FF00EA559D /* VVVideoEncoder.h */,
+				E6B9D2141D1683FF00EA559D /* VVVideoEncoder.m */,
 				E65EE0681D112C03007E7529 /* H264HwEncoderImpl.h */,
 				E65EE0691D112C03007E7529 /* H264HwEncoderImpl.m */,
+				E6B9D2101D16803700EA559D /* VVVideoEncodeFrame.h */,
+				E6B9D2111D16803700EA559D /* VVVideoEncodeFrame.m */,
 			);
 			path = H264HwEncode;
 			sourceTree = "<group>";
@@ -135,6 +153,7 @@
 		E693A3951CF7E95A004AC1B8 /* LiveDemo */ = {
 			isa = PBXGroup;
 			children = (
+				E6B9D2091D167F3E00EA559D /* EncodeFrame */,
 				E61D3FAB1D1395730073055B /* AudioEncoder */,
 				E65EE0671D112C03007E7529 /* H264HwEncode */,
 				E693A4731CF83882004AC1B8 /* IJKMediaPlayer.xcodeproj */,
@@ -176,6 +195,15 @@
 				E693A49B1CF83882004AC1B8 /* IJKMediaFrameworkTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		E6B9D2091D167F3E00EA559D /* EncodeFrame */ = {
+			isa = PBXGroup;
+			children = (
+				E6B9D20A1D167F3E00EA559D /* VVEncodeFrame.h */,
+				E6B9D20B1D167F3E00EA559D /* VVEncodeFrame.m */,
+			);
+			path = EncodeFrame;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -323,12 +351,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E6B9D2121D16803700EA559D /* VVVideoEncodeFrame.m in Sources */,
 				E693A39E1CF7E95A004AC1B8 /* ViewController.m in Sources */,
 				E65EE06A1D112C03007E7529 /* H264HwEncoderImpl.m in Sources */,
 				E693A39B1CF7E95A004AC1B8 /* AppDelegate.m in Sources */,
+				E6B9D2151D1683FF00EA559D /* VVVideoEncoder.m in Sources */,
 				E61D3FB31D13D06D0073055B /* VVAudioEncoder.m in Sources */,
 				E693A3981CF7E95A004AC1B8 /* main.m in Sources */,
 				E693A3B01CF7EA0F004AC1B8 /* LiveRecordViewController.m in Sources */,
+				E6B9D20F1D16800100EA559D /* VVAudioEncodeFrame.m in Sources */,
+				E6B9D20C1D167F3E00EA559D /* VVEncodeFrame.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -447,6 +479,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = hxp.LiveDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "cefd5443-0690-4671-89f4-24ba19c346b3";
 			};
 			name = Debug;
 		};
@@ -461,6 +494,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = hxp.LiveDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "cefd5443-0690-4671-89f4-24ba19c346b3";
 			};
 			name = Release;
 		};

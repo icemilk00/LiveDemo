@@ -82,7 +82,8 @@
     
     NSLog(@"================================\nsampleBuffer = %@",sampleBuffer);
     if (mediaType == MediaTypeAudio) {
-        [audioEncoder encodeSampleBuffer:sampleBuffer completeBlock:^(NSData *encodedData, NSError *error) {
+        [audioEncoder encodeSampleBuffer:sampleBuffer timeStamp:10 completeBlock:^(VVAudioEncodeFrame *encodeFrame, NSError *error) {
+            NSData *encodedData = encodeFrame.encodeData;
             if (encodedData) {
                 
                 NSLog(@"Audio data (%lu): %@", (unsigned long)encodedData.length, encodedData.description);

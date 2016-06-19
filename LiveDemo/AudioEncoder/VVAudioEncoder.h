@@ -9,9 +9,10 @@
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
+#import "VVAudioEncodeFrame.h"
 
 @interface VVAudioEncoder : NSObject
 
--(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer completeBlock:(void (^)(NSData *encodeData, NSError *error))completeBlock;
+-(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(void (^)(VVAudioEncodeFrame *encodeFrame, NSError *error))completeBlock;
 
 @end
