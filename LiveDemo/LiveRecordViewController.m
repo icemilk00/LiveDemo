@@ -7,11 +7,13 @@
 //
 
 #import "LiveRecordViewController.h"
-#import "H264HwEncoderImpl.h"
 #import "VVAudioEncoder.h"
+#import "VVVideoEncoder.h"
 
+#import "VVLiveRtmpSocket.h"
+#define NOW (CACurrentMediaTime()*1000)
 
-@interface LiveRecordViewController () <H264HwEncoderImplDelegate>
+@interface LiveRecordViewController ()
 {
     /*
     AVCaptureSession *_avSession;
@@ -23,12 +25,19 @@
     AVCaptureVideoPreviewLayer *_previewLayer;
      */
     GPUImageVideoCamera *videoCamera;
-    H264HwEncoderImpl *h264Encoder;
+    VVVideoEncoder *h264Encoder;
     VVAudioEncoder *audioEncoder;
+    VVLiveRtmpSocket *rtmpSocket;
     
     NSMutableData *_audioEncodedData;
     NSMutableData *_videoEncodedData;
+    
+     dispatch_semaphore_t _lock;
 }
+
+@property (nonatomic, assign) uint64_t timestamp;
+@property (nonatomic, assign) BOOL isFirstFrame;
+@property (nonatomic, assign) uint64_t currentTimestamp;
 @end
 
 @implementation LiveRecordViewController
@@ -36,11 +45,21 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+     _lock = dispatch_semaphore_create(1);
+    self.timestamp = 0;
+    self.isFirstFrame = YES;
     _audioEncodedData = [[NSMutableData alloc] init];
     _videoEncodedData = [[NSMutableData alloc] init];
+    [self configRtmpSocket];
     [self configH264Encoder];
     [self configAudioEncoder];
     [self configVideoCamera];
+}
+
+-(void)configRtmpSocket
+{
+    rtmpSocket = [[VVLiveRtmpSocket alloc] init];
+    [rtmpSocket start];
 }
 
 -(void)configVideoCamera
@@ -57,10 +76,6 @@
     
     [videoCamera addAudioInputsAndOutputs];
     
-    [h264Encoder initEncode:480 height:640];
-    h264Encoder.delegate = self;
-    
-    
     [videoCamera startCameraCapture];
     
     [self.view addSubview:filteredVideoView];
@@ -68,8 +83,11 @@
 
 -(void)configH264Encoder
 {
-    h264Encoder = [[H264HwEncoderImpl alloc] init];
-    [h264Encoder initWithConfiguration];
+    VVVideoConfigure *videoConfig = [[VVVideoConfigure alloc] init];
+    videoConfig.videoSize = self.view.bounds.size;
+    
+    h264Encoder = [[VVVideoEncoder alloc] initWithConfig:videoConfig];
+
 }
 
 -(void)configAudioEncoder
@@ -79,56 +97,68 @@
 
 - (void)willOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer andType:(GPUImageMediaType)mediaType
 {
-    
-    NSLog(@"================================\nsampleBuffer = %@",sampleBuffer);
     if (mediaType == MediaTypeAudio) {
-        [audioEncoder encodeSampleBuffer:sampleBuffer timeStamp:10 completeBlock:^(VVAudioEncodeFrame *encodeFrame, NSError *error) {
-            NSData *encodedData = encodeFrame.encodeData;
-            if (encodedData) {
-                
-                NSLog(@"Audio data (%lu): %@", (unsigned long)encodedData.length, encodedData.description);
-                [_audioEncodedData appendData:encodedData];
-                
-            } else {
-                NSLog(@"Error encoding AAC: %@", error);
-            }
+        [audioEncoder encodeSampleBuffer:sampleBuffer timeStamp:self.currentTimestamp completeBlock:^(VVAudioEncodeFrame *encodeFrame) {
+            NSLog(@"audio encode frame = %@", encodeFrame);
+            [rtmpSocket sendFrame:encodeFrame];
         }];
     }
     else if (mediaType == MediaTypeVideo)
     {
-        [h264Encoder encode:sampleBuffer];
+        [h264Encoder encodeSampleBuffer:sampleBuffer timeStamp:self.currentTimestamp completeBlock:^(VVVideoEncodeFrame *encodeFrame) {
+            NSLog(@"video encode frame = %@", encodeFrame);
+            [rtmpSocket sendFrame:encodeFrame];
+        }];
     }
-}
-
-- (void)gotSpsPps:(NSData*)sps pps:(NSData*)pps
-{
     
-    const char bytes[] = "\x00\x00\x00\x01";
-    size_t length = (sizeof bytes) - 1; //string literals have implicit trailing '\0'
-    NSData *ByteHeader = [NSData dataWithBytes:bytes length:length];
-    [_videoEncodedData appendData:ByteHeader];
-    [_videoEncodedData appendData:sps];
-    [_videoEncodedData appendData:ByteHeader];
-    [_videoEncodedData appendData:pps];
 }
 
-#pragma mark
-#pragma mark - 视频数据回调
-- (void)gotEncodedData:(NSData*)data isKeyFrame:(BOOL)isKeyFrame
-{
-    NSLog(@"Video data (%lu): %@", (unsigned long)data.length, data.description);
-    const char bytes[] = "\x00\x00\x00\x01";
-    size_t length = (sizeof bytes) - 1; //string literals have implicit trailing '\0'
-    NSData *ByteHeader = [NSData dataWithBytes:bytes length:length];
-    
-    [_videoEncodedData appendData:ByteHeader];
-    [_videoEncodedData appendData:data];
-
+- (uint64_t)currentTimestamp{
+    dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
+    uint64_t currentts = 0;
+    if(_isFirstFrame == true) {
+        _timestamp = NOW;
+        _isFirstFrame = false;
+        currentts = 0;
+    }
+    else {
+        currentts = NOW - _timestamp;
+    }
+    _currentTimestamp = currentts;
+    dispatch_semaphore_signal(_lock);
+    return _currentTimestamp;
 }
+
+//- (void)gotSpsPps:(NSData*)sps pps:(NSData*)pps
+//{
+//    
+//    const char bytes[] = "\x00\x00\x00\x01";
+//    size_t length = (sizeof bytes) - 1; //string literals have implicit trailing '\0'
+//    NSData *ByteHeader = [NSData dataWithBytes:bytes length:length];
+//    [_videoEncodedData appendData:ByteHeader];
+//    [_videoEncodedData appendData:sps];
+//    [_videoEncodedData appendData:ByteHeader];
+//    [_videoEncodedData appendData:pps];
+//}
+//
+//#pragma mark
+//#pragma mark - 视频数据回调
+//- (void)gotEncodedData:(NSData*)data isKeyFrame:(BOOL)isKeyFrame
+//{
+//    NSLog(@"Video data (%lu): %@", (unsigned long)data.length, data.description);
+//    const char bytes[] = "\x00\x00\x00\x01";
+//    size_t length = (sizeof bytes) - 1; //string literals have implicit trailing '\0'
+//    NSData *ByteHeader = [NSData dataWithBytes:bytes length:length];
+//    
+//    [_videoEncodedData appendData:ByteHeader];
+//    [_videoEncodedData appendData:data];
+//
+//}
 
 -(void)dealloc
 {
 //    [h264Encoder End];
+    
 }
 
 @end

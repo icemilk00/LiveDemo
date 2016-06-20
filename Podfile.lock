@@ -1,15 +1,18 @@
 PODS:
   - GPUImage (0.1.7)
+  - librtmp-iOS (1.1.0)
   - TheAmazingAudioEngine (1.5.6)
 
 DEPENDENCIES:
   - GPUImage (~> 0.1)
+  - librtmp-iOS (~> 1.1.0)
   - TheAmazingAudioEngine (~> 1.5)
 
 SPEC CHECKSUMS:
   GPUImage: 733a5f0fab92df9de1c37ba9df520a833ccb406d
+  librtmp-iOS: bfe6a2978e01ac97160ede5d3ccde9e3c1d1ee58
   TheAmazingAudioEngine: 0ed8c05486646373a48b22a341d31de42d1af2c3
 
-PODFILE CHECKSUM: 0976b4319279ba132c7d36c03dc72e2bd19575e6
+PODFILE CHECKSUM: 10e826791786f77dc2960aaaf3ae3625fc475a1e
 
 COCOAPODS: 1.0.1

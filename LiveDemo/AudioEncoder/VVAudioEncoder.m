@@ -11,10 +11,7 @@
 @interface VVAudioEncoder()
 {
     AudioConverterRef _audioCoverter;   //编码器
-    
-    dispatch_queue_t _encodeQueue;      //编码队列
-    dispatch_queue_t _callBackQueue;    //执行回调队列
-    
+
     size_t *_pcmBuffer;
     UInt32 _pcmBufferSize;
     
@@ -30,9 +27,7 @@
 {
     self = [super init];
     if (self) {
-        _encodeQueue = dispatch_queue_create("AudioEncodeQueue", DISPATCH_QUEUE_SERIAL);
-        _callBackQueue = dispatch_queue_create("AudioEncodeCallBackQueue", DISPATCH_QUEUE_SERIAL);
-        
+
         _pcmBufferSize = 0;
         _pcmBuffer = NULL;
         
@@ -119,65 +114,68 @@
     return nil;
 }
 
--(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(void (^)(VVAudioEncodeFrame *encodeFrame, NSError *error))completeBlock
+-(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(void (^)(VVAudioEncodeFrame *encodeFrame))completeBlock
 {
     CFRetain(sampleBuffer);
-    dispatch_async(_encodeQueue, ^{
+    
+    if (!_audioCoverter) {
+        [self makeAudioConverterFromInPutSampleBuffer:sampleBuffer];
+    }
+    
+    /*
+     CMBlockBuffer是在处理系统中用于移动内存块的对象。它表示在可能的非连续内存区域中，数据的连续值。怎么理解？我的理解是，可能CMBlockBuffer中的数据存
+     放在不同的区域中，可能来自内存块，也可能来自其他的buffer reference，使用CMBlockBuffer就隐藏了具体的存储细节，让你可以简单地使用0到
+     CMBlockBufferGetDataLength的索引来定位数据。
+    */
+    CMBlockBufferRef blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer);
+    CFRetain(blockBuffer);
+    
+    //获取_pcmBuffer大小和初始指针
+    OSStatus status = CMBlockBufferGetDataPointer(blockBuffer, 0, NULL, &_pcmBufferSize, &_pcmBuffer);
+    NSError *error = nil;
+    if (status != kCMBlockBufferNoErr) {
+        error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+    }
+    
+    memset(_aacBuffer, 0, _aacBufferSize);
+    
+    AudioBufferList outputAudioBufferList = {0};
+    outputAudioBufferList.mNumberBuffers = 1;
+    outputAudioBufferList.mBuffers[0].mDataByteSize = _aacBufferSize;
+    outputAudioBufferList.mBuffers[0].mData = _aacBuffer;
+    
+    AudioStreamPacketDescription outputPacketDescription = {0};
+    UInt32 ioOutputDataPacketSize = 1;
+    
+    status = AudioConverterFillComplexBuffer(_audioCoverter, incodeDataProc, (__bridge void * _Nullable)(self), &ioOutputDataPacketSize, &outputAudioBufferList, &outputPacketDescription);
+    NSData *data = nil;
+    VVAudioEncodeFrame *audioFrame = [[VVAudioEncodeFrame alloc] init];
+    if (status == 0) {
+        NSData *rawAAC = [NSData dataWithBytes:outputAudioBufferList.mBuffers[0].mData length:outputAudioBufferList.mBuffers[0].mDataByteSize];
+        NSData *adtsHeader = [self adtsDataForPacketLength:rawAAC.length];
+        NSMutableData *fullData = [NSMutableData dataWithData:adtsHeader];
+        [fullData appendData:rawAAC];
+        data = rawAAC;
         
-        if (!_audioCoverter) {
-            [self makeAudioConverterFromInPutSampleBuffer:sampleBuffer];
-        }
+        audioFrame.encodeData = data;
+        audioFrame.timeStamp = timeStamp;
+        char exeData[2];
+        exeData[0] = 0x12;
+        exeData[1] = 0x10;
+        audioFrame.audioInfo = [NSData dataWithBytes:exeData length:2];
         
-        /*
-         CMBlockBuffer是在处理系统中用于移动内存块的对象。它表示在可能的非连续内存区域中，数据的连续值。怎么理解？我的理解是，可能CMBlockBuffer中的数据存
-         放在不同的区域中，可能来自内存块，也可能来自其他的buffer reference，使用CMBlockBuffer就隐藏了具体的存储细节，让你可以简单地使用0到
-         CMBlockBufferGetDataLength的索引来定位数据。
-        */
-        CMBlockBufferRef blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer);
-        CFRetain(blockBuffer);
-        
-        //获取_pcmBuffer大小和初始指针
-        OSStatus status = CMBlockBufferGetDataPointer(blockBuffer, 0, NULL, &_pcmBufferSize, &_pcmBuffer);
-        NSError *error = nil;
-        if (status != kCMBlockBufferNoErr) {
-            error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
-        }
-        
-        memset(_aacBuffer, 0, _aacBufferSize);
-        
-        AudioBufferList outputAudioBufferList = {0};
-        outputAudioBufferList.mNumberBuffers = 1;
-        outputAudioBufferList.mBuffers[0].mDataByteSize = _aacBufferSize;
-        outputAudioBufferList.mBuffers[0].mData = _aacBuffer;
-        
-        AudioStreamPacketDescription outputPacketDescription = {0};
-        UInt32 ioOutputDataPacketSize = 1;
-        
-        status = AudioConverterFillComplexBuffer(_audioCoverter, incodeDataProc, (__bridge void * _Nullable)(self), &ioOutputDataPacketSize, &outputAudioBufferList, &outputPacketDescription);
-        NSData *data = nil;
-        VVAudioEncodeFrame *audioFrame = [[VVAudioEncodeFrame alloc] init];
-        if (status == 0) {
-            NSData *rawAAC = [NSData dataWithBytes:outputAudioBufferList.mBuffers[0].mData length:outputAudioBufferList.mBuffers[0].mDataByteSize];
-            NSData *adtsHeader = [self adtsDataForPacketLength:rawAAC.length];
-            NSMutableData *fullData = [NSMutableData dataWithData:adtsHeader];
-            [fullData appendData:rawAAC];
-            data = fullData;
-            
-            audioFrame.encodeData = data;
-            audioFrame.timeStamp = timeStamp;
-            
-        } else {
-            error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
-        }
         if (completeBlock) {
-            dispatch_async(_callBackQueue, ^{
-                completeBlock(audioFrame, error);
-            });
+            completeBlock(audioFrame);
         }
-        CFRelease(sampleBuffer);
-        CFRelease(blockBuffer);
         
-    });
+    } else {
+        error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+        NSLog(@"audio encode failed : %@", error.description);
+    }
+    
+    CFRelease(sampleBuffer);
+    CFRelease(blockBuffer);
+    
 }
 
 static OSStatus incodeDataProc(AudioConverterRef inAudioConverter, UInt32 *ioNumberDataPackets, AudioBufferList *ioData, AudioStreamPacketDescription **outDataPacketDescription, void *inUserData)

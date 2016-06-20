@@ -13,6 +13,6 @@
 
 @interface VVAudioEncoder : NSObject
 
--(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(void (^)(VVAudioEncodeFrame *encodeFrame, NSError *error))completeBlock;
+-(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(void (^)(VVAudioEncodeFrame *encodeFrame))completeBlock;
 
 @end

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		E61D3FB31D13D06D0073055B /* VVAudioEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = E61D3FB21D13D06D0073055B /* VVAudioEncoder.m */; };
-		E65EE06A1D112C03007E7529 /* H264HwEncoderImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = E65EE0691D112C03007E7529 /* H264HwEncoderImpl.m */; };
 		E693A3981CF7E95A004AC1B8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E693A3971CF7E95A004AC1B8 /* main.m */; };
 		E693A39B1CF7E95A004AC1B8 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E693A39A1CF7E95A004AC1B8 /* AppDelegate.m */; };
 		E693A39E1CF7E95A004AC1B8 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E693A39D1CF7E95A004AC1B8 /* ViewController.m */; };
@@ -22,6 +21,11 @@
 		E6B9D20F1D16800100EA559D /* VVAudioEncodeFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B9D20E1D16800100EA559D /* VVAudioEncodeFrame.m */; };
 		E6B9D2121D16803700EA559D /* VVVideoEncodeFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B9D2111D16803700EA559D /* VVVideoEncodeFrame.m */; };
 		E6B9D2151D1683FF00EA559D /* VVVideoEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = E6B9D2141D1683FF00EA559D /* VVVideoEncoder.m */; };
+		E6D18AF91D17CE5B0062285A /* VVLiveRtmpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = E6D18AF81D17CE5B0062285A /* VVLiveRtmpSocket.m */; };
+		E6D18B021D1813470062285A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6D18B011D1813470062285A /* Security.framework */; };
+		E6D18B041D18134F0062285A /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6D18B031D18134F0062285A /* CFNetwork.framework */; };
+		E6D18B061D1813580062285A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6D18B051D1813580062285A /* UIKit.framework */; };
+		E6D18B081D1813850062285A /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E6D18B071D1813850062285A /* libz.tbd */; };
 		ED8AE2B2CFA38353437096DA /* libPods-LiveDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EBD8130D3E98C961D8DEF5C /* libPods-LiveDemo.a */; };
 /* End PBXBuildFile section */
 
@@ -48,8 +52,6 @@
 		2EBD8130D3E98C961D8DEF5C /* libPods-LiveDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LiveDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E61D3FB11D13D06D0073055B /* VVAudioEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVAudioEncoder.h; sourceTree = "<group>"; };
 		E61D3FB21D13D06D0073055B /* VVAudioEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVAudioEncoder.m; sourceTree = "<group>"; };
-		E65EE0681D112C03007E7529 /* H264HwEncoderImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = H264HwEncoderImpl.h; sourceTree = "<group>"; };
-		E65EE0691D112C03007E7529 /* H264HwEncoderImpl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = H264HwEncoderImpl.m; sourceTree = "<group>"; };
 		E693A3931CF7E95A004AC1B8 /* LiveDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiveDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E693A3971CF7E95A004AC1B8 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E693A3991CF7E95A004AC1B8 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -73,6 +75,12 @@
 		E6B9D2111D16803700EA559D /* VVVideoEncodeFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVVideoEncodeFrame.m; sourceTree = "<group>"; };
 		E6B9D2131D1683FF00EA559D /* VVVideoEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVVideoEncoder.h; sourceTree = "<group>"; };
 		E6B9D2141D1683FF00EA559D /* VVVideoEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVVideoEncoder.m; sourceTree = "<group>"; };
+		E6D18AF71D17CE5B0062285A /* VVLiveRtmpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVLiveRtmpSocket.h; sourceTree = "<group>"; };
+		E6D18AF81D17CE5B0062285A /* VVLiveRtmpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVLiveRtmpSocket.m; sourceTree = "<group>"; };
+		E6D18B011D1813470062285A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		E6D18B031D18134F0062285A /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		E6D18B051D1813580062285A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		E6D18B071D1813850062285A /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +88,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E6D18B081D1813850062285A /* libz.tbd in Frameworks */,
+				E6D18B061D1813580062285A /* UIKit.framework in Frameworks */,
+				E6D18B041D18134F0062285A /* CFNetwork.framework in Frameworks */,
+				E6D18B021D1813470062285A /* Security.framework in Frameworks */,
 				E693A49D1CF846DF004AC1B8 /* VideoToolbox.framework in Frameworks */,
 				E693A3B21CF7EA40004AC1B8 /* AVFoundation.framework in Frameworks */,
 				ED8AE2B2CFA38353437096DA /* libPods-LiveDemo.a in Frameworks */,
@@ -92,6 +104,10 @@
 		7C456A6D653EEB2137431374 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E6D18B071D1813850062285A /* libz.tbd */,
+				E6D18B051D1813580062285A /* UIKit.framework */,
+				E6D18B031D18134F0062285A /* CFNetwork.framework */,
+				E6D18B011D1813470062285A /* Security.framework */,
 				E693A49C1CF846DF004AC1B8 /* VideoToolbox.framework */,
 				E693A3B11CF7EA40004AC1B8 /* AVFoundation.framework */,
 				2EBD8130D3E98C961D8DEF5C /* libPods-LiveDemo.a */,
@@ -119,16 +135,15 @@
 			path = AudioEncoder;
 			sourceTree = "<group>";
 		};
-		E65EE0671D112C03007E7529 /* H264HwEncode */ = {
+		E65EE0671D112C03007E7529 /* VideoEncoder */ = {
 			isa = PBXGroup;
 			children = (
 				E6B9D2131D1683FF00EA559D /* VVVideoEncoder.h */,
 				E6B9D2141D1683FF00EA559D /* VVVideoEncoder.m */,
-				E65EE0681D112C03007E7529 /* H264HwEncoderImpl.h */,
-				E65EE0691D112C03007E7529 /* H264HwEncoderImpl.m */,
 				E6B9D2101D16803700EA559D /* VVVideoEncodeFrame.h */,
 				E6B9D2111D16803700EA559D /* VVVideoEncodeFrame.m */,
 			);
+			name = VideoEncoder;
 			path = H264HwEncode;
 			sourceTree = "<group>";
 		};
@@ -153,9 +168,10 @@
 		E693A3951CF7E95A004AC1B8 /* LiveDemo */ = {
 			isa = PBXGroup;
 			children = (
+				E6D18AF21D17CD590062285A /* RtmpSocket */,
 				E6B9D2091D167F3E00EA559D /* EncodeFrame */,
 				E61D3FAB1D1395730073055B /* AudioEncoder */,
-				E65EE0671D112C03007E7529 /* H264HwEncode */,
+				E65EE0671D112C03007E7529 /* VideoEncoder */,
 				E693A4731CF83882004AC1B8 /* IJKMediaPlayer.xcodeproj */,
 				E693A3AD1CF7E9EE004AC1B8 /* LiveRecord */,
 				E693A3991CF7E95A004AC1B8 /* AppDelegate.h */,
@@ -204,6 +220,15 @@
 				E6B9D20B1D167F3E00EA559D /* VVEncodeFrame.m */,
 			);
 			path = EncodeFrame;
+			sourceTree = "<group>";
+		};
+		E6D18AF21D17CD590062285A /* RtmpSocket */ = {
+			isa = PBXGroup;
+			children = (
+				E6D18AF71D17CE5B0062285A /* VVLiveRtmpSocket.h */,
+				E6D18AF81D17CE5B0062285A /* VVLiveRtmpSocket.m */,
+			);
+			path = RtmpSocket;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -353,10 +378,10 @@
 			files = (
 				E6B9D2121D16803700EA559D /* VVVideoEncodeFrame.m in Sources */,
 				E693A39E1CF7E95A004AC1B8 /* ViewController.m in Sources */,
-				E65EE06A1D112C03007E7529 /* H264HwEncoderImpl.m in Sources */,
 				E693A39B1CF7E95A004AC1B8 /* AppDelegate.m in Sources */,
 				E6B9D2151D1683FF00EA559D /* VVVideoEncoder.m in Sources */,
 				E61D3FB31D13D06D0073055B /* VVAudioEncoder.m in Sources */,
+				E6D18AF91D17CE5B0062285A /* VVLiveRtmpSocket.m in Sources */,
 				E693A3981CF7E95A004AC1B8 /* main.m in Sources */,
 				E693A3B01CF7EA0F004AC1B8 /* LiveRecordViewController.m in Sources */,
 				E6B9D20F1D16800100EA559D /* VVAudioEncodeFrame.m in Sources */,
@@ -474,12 +499,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = LiveDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = hxp.LiveDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "cefd5443-0690-4671-89f4-24ba19c346b3";
+				PROVISIONING_PROFILE = "7addda89-3624-48ee-bb8e-e109405ee28f";
 			};
 			name = Debug;
 		};
@@ -489,12 +515,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = LiveDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = hxp.LiveDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "cefd5443-0690-4671-89f4-24ba19c346b3";
+				PROVISIONING_PROFILE = "7addda89-3624-48ee-bb8e-e109405ee28f";
 			};
 			name = Release;
 		};

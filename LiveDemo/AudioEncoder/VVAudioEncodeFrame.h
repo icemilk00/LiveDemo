@@ -10,4 +10,7 @@
 
 @interface VVAudioEncodeFrame : VVEncodeFrame
 
+/// flv打包中aac的header,AACAUDIODATA 这里用固定的 0x12、0x10
+@property (nonatomic, strong) NSData *audioInfo;
+
 @end

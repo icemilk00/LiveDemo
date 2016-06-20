@@ -11,12 +11,13 @@
 #import <AVFoundation/AVFoundation.h>
 #import "VVVideoEncodeFrame.h"
 
-typedef  void(^VideoEncodeCompleteBlock)(VVVideoEncodeFrame *encodeFrame, NSError *error);
+typedef  void(^VideoEncodeCompleteBlock)(VVVideoEncodeFrame *encodeFrame);
 
 @class VVVideoConfigure;
 
 @interface VVVideoEncoder : NSObject
 
+-(id)initWithConfig:(VVVideoConfigure *)config;
 -(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(VideoEncodeCompleteBlock)completeBlock;
 
 @end

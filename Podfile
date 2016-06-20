@@ -11,4 +11,6 @@ target 'LiveDemo' do
   
   # https://github.com/TheAmazingAudioEngine/TheAmazingAudioEngine
   pod 'TheAmazingAudioEngine', '~> 1.5'
+  
+  pod 'librtmp-iOS', '~> 1.1.0'
 end
