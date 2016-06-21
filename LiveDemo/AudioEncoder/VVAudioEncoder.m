@@ -114,7 +114,7 @@
     return nil;
 }
 
--(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(void (^)(VVAudioEncodeFrame *encodeFrame))completeBlock
+-(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp
 {
     CFRetain(sampleBuffer);
     
@@ -164,8 +164,8 @@
         exeData[1] = 0x10;
         audioFrame.audioInfo = [NSData dataWithBytes:exeData length:2];
         
-        if (completeBlock) {
-            completeBlock(audioFrame);
+        if (self.delegate && [self.delegate respondsToSelector:@selector(audioEncodeComplete:)]) {
+            [self.delegate audioEncodeComplete:audioFrame];
         }
         
     } else {

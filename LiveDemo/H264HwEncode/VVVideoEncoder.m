@@ -7,13 +7,13 @@
 //
 
 #import "VVVideoEncoder.h"
+#import "VVLiveVideoConfiguration.h"
 
 @interface VVVideoEncoder()
 {
     VTCompressionSessionRef _videoCompressionSession;
     
-    VVVideoConfigure *_currentVideoEncodeConfig;
-    VideoEncodeCompleteBlock _videoEncodeCompleteBlock;
+    VVLiveVideoConfiguration *_currentVideoEncodeConfig;
     
     NSInteger frameCount;
     
@@ -25,7 +25,7 @@
 
 @implementation VVVideoEncoder
 
--(id)initWithConfig:(VVVideoConfigure *)config
+-(id)initWithConfig:(VVLiveVideoConfiguration *)config
 {
     self = [super init];
     if (self) {
@@ -44,7 +44,13 @@
     OSStatus status =  VTCompressionSessionCreate(NULL, _currentVideoEncodeConfig.videoSize.width, _currentVideoEncodeConfig.videoSize.height, kCMVideoCodecType_H264, NULL, NULL, NULL, compressionOutputCallback, (__bridge void * _Nullable)(self), &_videoCompressionSession);
     
     if (status != noErr) return;
-    
+    VTSessionSetProperty(_videoCompressionSession, kVTCompressionPropertyKey_MaxKeyFrameInterval,(__bridge CFTypeRef)@(_currentVideoEncodeConfig.videoMaxKeyframeInterval));
+//    VTSessionSetProperty(_videoCompressionSession, kVTCompressionPropertyKey_MaxKeyFrameIntervalDuration,(__bridge CFTypeRef)@(_currentVideoEncodeConfig.videoMaxKeyframeInterval));
+    VTSessionSetProperty(_videoCompressionSession, kVTCompressionPropertyKey_ExpectedFrameRate, (__bridge CFTypeRef)@(_currentVideoEncodeConfig.videoFrameRate));
+    VTSessionSetProperty(_videoCompressionSession, kVTCompressionPropertyKey_AverageBitRate, (__bridge CFTypeRef)@(_currentVideoEncodeConfig.videoBitRate));
+    //设置后画质变清楚，暂时不知道为什么
+    NSArray *limit = @[@(_currentVideoEncodeConfig.videoBitRate * 1.5/8),@(1)];
+    VTSessionSetProperty(_videoCompressionSession, kVTCompressionPropertyKey_DataRateLimits, (__bridge CFArrayRef)limit);
     //是否实时编码，不清楚到底设为什么，这里设为不实时，是因为音画同步要更具时间戳来同步，可能不需要实时
     VTSessionSetProperty(_videoCompressionSession, kVTCompressionPropertyKey_RealTime, kCFBooleanFalse);
     //指定编码流的配置和水品设为自动
@@ -61,10 +67,8 @@
 }
 
 
--(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(VideoEncodeCompleteBlock)completeBlock
+-(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp
 {
-
-    _videoEncodeCompleteBlock = completeBlock;
 
     frameCount++;
     CVImageBufferRef imageBuffer = (CVImageBufferRef)CMSampleBufferGetImageBuffer(sampleBuffer);
@@ -130,9 +134,8 @@ static void compressionOutputCallback(void *outputCallbackRefCon, void *sourceFr
             videoFrame.pps = videoEncoder->pps;
             videoFrame.isKeyFrame = keyFrame;
 
-            
-            if (videoEncoder->_videoEncodeCompleteBlock) {
-                videoEncoder->_videoEncodeCompleteBlock(videoFrame);
+            if (videoEncoder->_delegate && [videoEncoder->_delegate respondsToSelector:@selector(videoEncodeComplete:)]) {
+                [videoEncoder->_delegate videoEncodeComplete:videoFrame];
             }
             
             buffOffset += AVCCHeaderLength + NALUnitLength;
@@ -158,10 +161,5 @@ static void compressionOutputCallback(void *outputCallbackRefCon, void *sourceFr
     }
 }
 
-
-@end
-
-
-@implementation VVVideoConfigure
 
 @end

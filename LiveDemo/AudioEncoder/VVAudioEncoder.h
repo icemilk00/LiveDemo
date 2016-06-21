@@ -11,8 +11,17 @@
 #import <AVFoundation/AVFoundation.h>
 #import "VVAudioEncodeFrame.h"
 
+
+@protocol VVAudioEncoderDelegate <NSObject>
+
+-(void)audioEncodeComplete:(VVAudioEncodeFrame *)encodeFrame;
+
+@end
+
+
 @interface VVAudioEncoder : NSObject
 
--(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(void (^)(VVAudioEncodeFrame *encodeFrame))completeBlock;
+-(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp;
 
+@property (nonatomic, assign) id <VVAudioEncoderDelegate> delegate;
 @end

@@ -10,21 +10,22 @@
 #import <VideoToolbox/VideoToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 #import "VVVideoEncodeFrame.h"
-
-typedef  void(^VideoEncodeCompleteBlock)(VVVideoEncodeFrame *encodeFrame);
+#import "VVLiveVideoConfiguration.h"
 
 @class VVVideoConfigure;
 
+@protocol VVVideoEncoderDelegate <NSObject>
+
+-(void)videoEncodeComplete:(VVVideoEncodeFrame *)encodeFrame;
+
+@end
+
 @interface VVVideoEncoder : NSObject
 
--(id)initWithConfig:(VVVideoConfigure *)config;
--(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp completeBlock:(VideoEncodeCompleteBlock)completeBlock;
+-(id)initWithConfig:(VVLiveVideoConfiguration *)config;
+-(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp;
+
+@property (nonatomic, assign) id <VVVideoEncoderDelegate> delegate;
 
 @end
 
-
-@interface VVVideoConfigure : NSObject
-
-@property (nonatomic, assign) CGSize videoSize;
-
-@end

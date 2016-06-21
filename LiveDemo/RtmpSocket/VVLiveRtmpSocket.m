@@ -11,7 +11,7 @@
 #import "VVAudioEncodeFrame.h"
 #import "rtmp.h"
 
-#define RTMP_RECEIVE_TIMEOUT    2
+#define RTMP_RECEIVE_TIMEOUT   2
 
 @interface VVLiveRtmpSocket()
 {
@@ -19,10 +19,17 @@
     BOOL _isSending;
     BOOL _isFirstSendVideo;
     BOOL _isFirstSendAudio;
+
+    BOOL _isConnected;
+    BOOL _isConnecting;
+    BOOL _isReconnecting;
 }
 
 @property (nonatomic, strong) dispatch_queue_t socketQueue;
 @property (nonatomic, strong) NSMutableArray *frameArray;
+@property (nonatomic, strong) NSMutableArray *sortFrameArray;
+
+@property (nonatomic, strong) NSString *rtmpUrlStrl;
 
 @end
 
@@ -33,14 +40,47 @@
     self = [super init];
     if (self) {
         _isSending = NO;
+        _isConnected = NO;
+        _isConnecting = NO;
+        _isReconnecting = NO;
+        
         _isFirstSendVideo = NO;
         _isFirstSendAudio = NO;
+        
+        self.sortFrameArray = [[NSMutableArray alloc] init];
+        self.rtmpUrlStrl = @"rtmp://192.168.16.155:5920/rtmplive/room";
     }
     return self;
 }
 
 -(void)start
 {
+    dispatch_async(self.socketQueue, ^{
+        
+        if (_isConnecting || _rtmp != NULL) {
+            return;
+        }
+        
+        [self connectRtmp];
+    });
+}
+
+-(void)stop
+{
+    dispatch_async(self.socketQueue, ^{
+        if(_rtmp != NULL){
+            RTMP_Close(_rtmp);
+            RTMP_Free(_rtmp);
+            _rtmp = NULL;
+        }
+        [self clean];
+    });
+}
+
+-(void)connectRtmp
+{
+    _isConnecting = YES;
+    
     if(_rtmp != NULL){
         RTMP_Close(_rtmp);
         RTMP_Free(_rtmp);
@@ -50,7 +90,7 @@
     RTMP_Init(_rtmp);
     
     //设置URL
-    char *push_url = "rtmp://192.168.16.157:5920/rtmplive/room";
+    char *push_url = (char *)[self.rtmpUrlStrl cStringUsingEncoding:NSASCIIStringEncoding];
     if (RTMP_SetupURL(_rtmp, push_url) < 0){
         //log(LOG_ERR, "RTMP_SetupURL() failed!");
         goto Failed;
@@ -70,11 +110,29 @@
         goto Failed;
     }
     
+    _isConnected = YES;
+    _isConnecting = NO;
+    _isReconnecting = NO;
+    _isSending = NO;
     return;
     
 Failed:
     RTMP_Close(_rtmp);
     RTMP_Free(_rtmp);
+    [self clean];
+}
+
+
+- (void)clean{
+    _isConnecting = NO;
+    _isReconnecting = NO;
+    _isSending = NO;
+    _isConnected = NO;
+    _isFirstSendVideo = NO;
+    _isFirstSendAudio = NO;
+    [self.frameArray removeAllObjects];
+    [self.sortFrameArray removeAllObjects];
+    
 }
 
 -(void)sendFrame
@@ -179,8 +237,39 @@ Failed:
     body[i++] = (frame.encodeData.length >>  8) & 0xff;
     body[i++] = (frame.encodeData.length ) & 0xff;
     memcpy(&body[i],frame.encodeData.bytes,frame.encodeData.length);
-    
+    NSLog(@"video timeStamp = %llu", frame.timeStamp);
     [self sendPacket:RTMP_PACKET_TYPE_VIDEO data:body size:(rtmpLength) nTimestamp:frame.timeStamp];
+    free(body);
+}
+
+- (void)sendAudioHeader:(VVAudioEncodeFrame*)audioFrame{
+    if(!audioFrame || !audioFrame.audioInfo) return;
+    
+    NSInteger rtmpLength = audioFrame.audioInfo.length + 2;/*spec data长度,一般是2*/
+    unsigned char * body = (unsigned char*)malloc(rtmpLength);
+    memset(body,0,rtmpLength);
+    
+    /*AF 00 + AAC RAW data*/
+    body[0] = 0xAF;
+    body[1] = 0x00;
+    memcpy(&body[2],audioFrame.audioInfo.bytes,audioFrame.audioInfo.length); /*spec_buf是AAC sequence header数据*/
+    [self sendPacket:RTMP_PACKET_TYPE_AUDIO data:body size:rtmpLength nTimestamp:0];
+    free(body);
+}
+
+- (void)sendAudio:(VVAudioEncodeFrame*)frame{
+    if(!frame) return;
+    
+    NSInteger rtmpLength = frame.encodeData.length + 2;/*spec data长度,一般是2*/
+    unsigned char * body = (unsigned char*)malloc(rtmpLength);
+    memset(body,0,rtmpLength);
+    
+    /*AF 01 + AAC RAW data*/
+    body[0] = 0xAF;
+    body[1] = 0x01;
+    memcpy(&body[2],frame.encodeData.bytes,frame.encodeData.length);
+    NSLog(@"audio timeStamp = %llu", frame.timeStamp);
+    [self sendPacket:RTMP_PACKET_TYPE_AUDIO data:body size:rtmpLength nTimestamp:frame.timeStamp];
     free(body);
 }
 
@@ -221,56 +310,58 @@ Failed:
     return -1;
 }
 
-- (void)sendAudioHeader:(VVAudioEncodeFrame*)audioFrame{
-    if(!audioFrame || !audioFrame.audioInfo) return;
-    
-    NSInteger rtmpLength = audioFrame.audioInfo.length + 2;/*spec data长度,一般是2*/
-    unsigned char * body = (unsigned char*)malloc(rtmpLength);
-    memset(body,0,rtmpLength);
-    
-    /*AF 00 + AAC RAW data*/
-    body[0] = 0xAF;
-    body[1] = 0x00;
-    memcpy(&body[2],audioFrame.audioInfo.bytes,audioFrame.audioInfo.length); /*spec_buf是AAC sequence header数据*/
-    [self sendPacket:RTMP_PACKET_TYPE_AUDIO data:body size:rtmpLength nTimestamp:0];
-    free(body);
-}
-
-- (void)sendAudio:(VVAudioEncodeFrame*)frame{
-    if(!frame) return;
-    
-    NSInteger rtmpLength = frame.encodeData.length + 2;/*spec data长度,一般是2*/
-    unsigned char * body = (unsigned char*)malloc(rtmpLength);
-    memset(body,0,rtmpLength);
-    
-    /*AF 01 + AAC RAW data*/
-    body[0] = 0xAF;
-    body[1] = 0x01;
-    memcpy(&body[2],frame.encodeData.bytes,frame.encodeData.length);
-    [self sendPacket:RTMP_PACKET_TYPE_AUDIO data:body size:rtmpLength nTimestamp:frame.timeStamp];
-    free(body);
-}
-
-
 -(void)sendFrame:(VVEncodeFrame *)frame
 {
     __weak typeof(self) _self = self;
     dispatch_async(self.socketQueue, ^{
+        
         __strong typeof(_self) self = _self;
         if(!frame) return;
-        
         @synchronized(self.frameArray) {
-            [self.frameArray addObject:frame];
+            [self appendObject:frame];
         }
-        
         [self sendFrame];
     });
+}
+
+#pragma mark - frame sort
+static const NSUInteger defaultSortBufferMaxCount = 10;///< 排序10个内
+
+- (void)appendObject:(VVEncodeFrame*)frame{
+    if(!frame) return;
+    
+    if(self.sortFrameArray.count < defaultSortBufferMaxCount){
+        [self.sortFrameArray addObject:frame];
+    }else{
+        ///< 排序
+        [self.sortFrameArray addObject:frame];
+        NSArray *sortedSendQuery = [self.sortFrameArray sortedArrayUsingFunction:frameDataCompare context:NULL];
+        [self.sortFrameArray removeAllObjects];
+        [self.sortFrameArray addObjectsFromArray:sortedSendQuery];
+        /// 丢帧
+//        [self removeExpireFrame];
+        /// 添加至缓冲区
+        VVEncodeFrame *firstFrame = [self.sortFrameArray firstObject];
+        [self.sortFrameArray removeObjectAtIndex:0];
+        if(firstFrame) [self.frameArray addObject:firstFrame];
+    }
+}
+
+NSInteger frameDataCompare(id obj1, id obj2, void *context){
+    VVEncodeFrame* frame1 = (VVEncodeFrame*) obj1;
+    VVEncodeFrame *frame2 = (VVEncodeFrame*) obj2;
+    
+    if (frame1.timeStamp == frame2.timeStamp)
+        return NSOrderedSame;
+    else if(frame1.timeStamp > frame2.timeStamp)
+        return NSOrderedDescending;
+    return NSOrderedAscending;
 }
 
 #pragma mark -- Getter Setter
 - (dispatch_queue_t)socketQueue{
     if(!_socketQueue){
-        _socketQueue = dispatch_queue_create("com.youku.LaiFeng.live.socketQueue", NULL);
+        _socketQueue = dispatch_queue_create("VVLiveRtmpSocketQueue", NULL);
     }
     return _socketQueue;
 }
@@ -281,6 +372,12 @@ Failed:
         _frameArray = [[NSMutableArray alloc] init];
     }
     return _frameArray;
+}
+
+#pragma mark - other
+-(void)dealloc
+{
+    
 }
 
 @end

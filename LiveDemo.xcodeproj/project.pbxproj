@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E611C83D1D191E6C00F8BB46 /* VVLiveAudioConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = E611C83C1D191E6C00F8BB46 /* VVLiveAudioConfiguration.m */; };
+		E611C8401D191EA200F8BB46 /* VVLiveVideoConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = E611C83F1D191EA200F8BB46 /* VVLiveVideoConfiguration.m */; };
+		E611C8451D19732300F8BB46 /* VVLiveSession.m in Sources */ = {isa = PBXBuildFile; fileRef = E611C8441D19732300F8BB46 /* VVLiveSession.m */; };
 		E61D3FB31D13D06D0073055B /* VVAudioEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = E61D3FB21D13D06D0073055B /* VVAudioEncoder.m */; };
 		E693A3981CF7E95A004AC1B8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E693A3971CF7E95A004AC1B8 /* main.m */; };
 		E693A39B1CF7E95A004AC1B8 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E693A39A1CF7E95A004AC1B8 /* AppDelegate.m */; };
@@ -50,6 +53,12 @@
 		0E12166929FCCA46E5E24987 /* Pods-LiveDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LiveDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LiveDemo/Pods-LiveDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		265E2FC16633D4223030538C /* Pods-LiveDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LiveDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-LiveDemo/Pods-LiveDemo.release.xcconfig"; sourceTree = "<group>"; };
 		2EBD8130D3E98C961D8DEF5C /* libPods-LiveDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LiveDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E611C83B1D191E6C00F8BB46 /* VVLiveAudioConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VVLiveAudioConfiguration.h; path = LiveDemo/AudioEncoder/VVLiveAudioConfiguration.h; sourceTree = SOURCE_ROOT; };
+		E611C83C1D191E6C00F8BB46 /* VVLiveAudioConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VVLiveAudioConfiguration.m; path = LiveDemo/AudioEncoder/VVLiveAudioConfiguration.m; sourceTree = SOURCE_ROOT; };
+		E611C83E1D191EA200F8BB46 /* VVLiveVideoConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVLiveVideoConfiguration.h; sourceTree = "<group>"; };
+		E611C83F1D191EA200F8BB46 /* VVLiveVideoConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVLiveVideoConfiguration.m; sourceTree = "<group>"; };
+		E611C8431D19732300F8BB46 /* VVLiveSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVLiveSession.h; sourceTree = "<group>"; };
+		E611C8441D19732300F8BB46 /* VVLiveSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVLiveSession.m; sourceTree = "<group>"; };
 		E61D3FB11D13D06D0073055B /* VVAudioEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VVAudioEncoder.h; sourceTree = "<group>"; };
 		E61D3FB21D13D06D0073055B /* VVAudioEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VVAudioEncoder.m; sourceTree = "<group>"; };
 		E693A3931CF7E95A004AC1B8 /* LiveDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiveDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -124,6 +133,15 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		E611C8421D19728F00F8BB46 /* LiveSession */ = {
+			isa = PBXGroup;
+			children = (
+				E611C8431D19732300F8BB46 /* VVLiveSession.h */,
+				E611C8441D19732300F8BB46 /* VVLiveSession.m */,
+			);
+			path = LiveSession;
+			sourceTree = "<group>";
+		};
 		E61D3FAB1D1395730073055B /* AudioEncoder */ = {
 			isa = PBXGroup;
 			children = (
@@ -131,6 +149,8 @@
 				E61D3FB21D13D06D0073055B /* VVAudioEncoder.m */,
 				E6B9D20D1D16800100EA559D /* VVAudioEncodeFrame.h */,
 				E6B9D20E1D16800100EA559D /* VVAudioEncodeFrame.m */,
+				E611C83B1D191E6C00F8BB46 /* VVLiveAudioConfiguration.h */,
+				E611C83C1D191E6C00F8BB46 /* VVLiveAudioConfiguration.m */,
 			);
 			path = AudioEncoder;
 			sourceTree = "<group>";
@@ -142,6 +162,8 @@
 				E6B9D2141D1683FF00EA559D /* VVVideoEncoder.m */,
 				E6B9D2101D16803700EA559D /* VVVideoEncodeFrame.h */,
 				E6B9D2111D16803700EA559D /* VVVideoEncodeFrame.m */,
+				E611C83E1D191EA200F8BB46 /* VVLiveVideoConfiguration.h */,
+				E611C83F1D191EA200F8BB46 /* VVLiveVideoConfiguration.m */,
 			);
 			name = VideoEncoder;
 			path = H264HwEncode;
@@ -168,6 +190,7 @@
 		E693A3951CF7E95A004AC1B8 /* LiveDemo */ = {
 			isa = PBXGroup;
 			children = (
+				E611C8421D19728F00F8BB46 /* LiveSession */,
 				E6D18AF21D17CD590062285A /* RtmpSocket */,
 				E6B9D2091D167F3E00EA559D /* EncodeFrame */,
 				E61D3FAB1D1395730073055B /* AudioEncoder */,
@@ -378,14 +401,17 @@
 			files = (
 				E6B9D2121D16803700EA559D /* VVVideoEncodeFrame.m in Sources */,
 				E693A39E1CF7E95A004AC1B8 /* ViewController.m in Sources */,
+				E611C83D1D191E6C00F8BB46 /* VVLiveAudioConfiguration.m in Sources */,
 				E693A39B1CF7E95A004AC1B8 /* AppDelegate.m in Sources */,
 				E6B9D2151D1683FF00EA559D /* VVVideoEncoder.m in Sources */,
 				E61D3FB31D13D06D0073055B /* VVAudioEncoder.m in Sources */,
 				E6D18AF91D17CE5B0062285A /* VVLiveRtmpSocket.m in Sources */,
 				E693A3981CF7E95A004AC1B8 /* main.m in Sources */,
+				E611C8401D191EA200F8BB46 /* VVLiveVideoConfiguration.m in Sources */,
 				E693A3B01CF7EA0F004AC1B8 /* LiveRecordViewController.m in Sources */,
 				E6B9D20F1D16800100EA559D /* VVAudioEncodeFrame.m in Sources */,
 				E6B9D20C1D167F3E00EA559D /* VVEncodeFrame.m in Sources */,
+				E611C8451D19732300F8BB46 /* VVLiveSession.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

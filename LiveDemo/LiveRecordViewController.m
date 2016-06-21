@@ -8,12 +8,14 @@
 
 #import "LiveRecordViewController.h"
 #import "VVAudioEncoder.h"
+#import "VVLiveAudioConfiguration.h"
 #import "VVVideoEncoder.h"
-
+#import "VVLiveVideoConfiguration.h"
 #import "VVLiveRtmpSocket.h"
+
 #define NOW (CACurrentMediaTime()*1000)
 
-@interface LiveRecordViewController ()
+@interface LiveRecordViewController () <VVVideoEncoderDelegate, VVAudioEncoderDelegate>
 {
     /*
     AVCaptureSession *_avSession;
@@ -25,15 +27,18 @@
     AVCaptureVideoPreviewLayer *_previewLayer;
      */
     GPUImageVideoCamera *videoCamera;
-    VVVideoEncoder *h264Encoder;
+    VVVideoEncoder *videoEncoder;
+    VVLiveVideoConfiguration *videoConfig;
     VVAudioEncoder *audioEncoder;
     VVLiveRtmpSocket *rtmpSocket;
     
     NSMutableData *_audioEncodedData;
     NSMutableData *_videoEncodedData;
     
-     dispatch_semaphore_t _lock;
+    dispatch_semaphore_t _timeSemaphore;
 }
+
+@property (nonatomic, strong) VVLiveRtmpSocket *rtmpSocket;
 
 @property (nonatomic, assign) uint64_t timestamp;
 @property (nonatomic, assign) BOOL isFirstFrame;
@@ -41,17 +46,18 @@
 @end
 
 @implementation LiveRecordViewController
+@synthesize rtmpSocket;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-     _lock = dispatch_semaphore_create(1);
+     _timeSemaphore = dispatch_semaphore_create(1);
     self.timestamp = 0;
     self.isFirstFrame = YES;
     _audioEncodedData = [[NSMutableData alloc] init];
     _videoEncodedData = [[NSMutableData alloc] init];
     [self configRtmpSocket];
-    [self configH264Encoder];
+    [self configVideoEncoder];
     [self configAudioEncoder];
     [self configVideoCamera];
 }
@@ -62,17 +68,43 @@
     [rtmpSocket start];
 }
 
+-(void)configVideoEncoder
+{
+    videoConfig = [VVLiveVideoConfiguration defaultConfigurationForQuality:VVLiveVideoQuality_Medium2];
+    
+    videoEncoder = [[VVVideoEncoder alloc] initWithConfig:videoConfig];
+    videoEncoder.delegate = self;
+
+}
+
+-(void)configAudioEncoder
+{
+    audioEncoder = [[VVAudioEncoder alloc] init];
+    audioEncoder.delegate = self;
+}
+
+
 -(void)configVideoCamera
 {
-    videoCamera = [[GPUImageVideoCamera alloc] initWithSessionPreset:AVCaptureSessionPresetHigh cameraPosition:AVCaptureDevicePositionBack];
+    videoCamera = [[GPUImageVideoCamera alloc] initWithSessionPreset:videoConfig.avSessionPreset cameraPosition:AVCaptureDevicePositionFront];
     videoCamera.delegate = self;
-    videoCamera.outputImageOrientation = UIInterfaceOrientationPortrait;
+    videoCamera.outputImageOrientation = videoConfig.orientation;
+    videoCamera.horizontallyMirrorFrontFacingCamera = NO;
+    videoCamera.horizontallyMirrorRearFacingCamera = NO;
+    videoCamera.frameRate = (int32_t)videoConfig.videoFrameRate;
     
     GPUImageHighlightShadowFilter *customFilter = [[GPUImageHighlightShadowFilter alloc] init];
     GPUImageView *filteredVideoView = [[GPUImageView alloc] initWithFrame:self.view.bounds];
+    [filteredVideoView setFillMode:kGPUImageFillModePreserveAspectRatioAndFill];
+    [filteredVideoView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+    [filteredVideoView setInputRotation:kGPUImageFlipHorizonal atIndex:0];
     
     [videoCamera addTarget:customFilter];
     [customFilter addTarget:filteredVideoView];
+    
+    
+    if(videoCamera.cameraPosition == AVCaptureDevicePositionFront) [filteredVideoView setInputRotation:kGPUImageFlipHorizonal atIndex:0];
+    else [filteredVideoView setInputRotation:kGPUImageNoRotation atIndex:0];
     
     [videoCamera addAudioInputsAndOutputs];
     
@@ -81,40 +113,30 @@
     [self.view addSubview:filteredVideoView];
 }
 
--(void)configH264Encoder
-{
-    VVVideoConfigure *videoConfig = [[VVVideoConfigure alloc] init];
-    videoConfig.videoSize = self.view.bounds.size;
-    
-    h264Encoder = [[VVVideoEncoder alloc] initWithConfig:videoConfig];
-
-}
-
--(void)configAudioEncoder
-{
-    audioEncoder = [[VVAudioEncoder alloc] init];
-}
 
 - (void)willOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer andType:(GPUImageMediaType)mediaType
 {
     if (mediaType == MediaTypeAudio) {
-        [audioEncoder encodeSampleBuffer:sampleBuffer timeStamp:self.currentTimestamp completeBlock:^(VVAudioEncodeFrame *encodeFrame) {
-            NSLog(@"audio encode frame = %@", encodeFrame);
-            [rtmpSocket sendFrame:encodeFrame];
-        }];
+        [audioEncoder encodeSampleBuffer:sampleBuffer timeStamp:self.currentTimestamp];
     }
     else if (mediaType == MediaTypeVideo)
     {
-        [h264Encoder encodeSampleBuffer:sampleBuffer timeStamp:self.currentTimestamp completeBlock:^(VVVideoEncodeFrame *encodeFrame) {
-            NSLog(@"video encode frame = %@", encodeFrame);
-            [rtmpSocket sendFrame:encodeFrame];
-        }];
+        [videoEncoder encodeSampleBuffer:sampleBuffer timeStamp:self.currentTimestamp];
     }
-    
+}
+
+-(void)audioEncodeComplete:(VVAudioEncodeFrame *)encodeFrame
+{
+    [rtmpSocket sendFrame:encodeFrame];
+}
+
+-(void)videoEncodeComplete:(VVVideoEncodeFrame *)encodeFrame
+{
+    [rtmpSocket sendFrame:encodeFrame];
 }
 
 - (uint64_t)currentTimestamp{
-    dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
+    dispatch_semaphore_wait(_timeSemaphore, DISPATCH_TIME_FOREVER);
     uint64_t currentts = 0;
     if(_isFirstFrame == true) {
         _timestamp = NOW;
@@ -125,40 +147,13 @@
         currentts = NOW - _timestamp;
     }
     _currentTimestamp = currentts;
-    dispatch_semaphore_signal(_lock);
+    dispatch_semaphore_signal(_timeSemaphore);
     return _currentTimestamp;
 }
 
-//- (void)gotSpsPps:(NSData*)sps pps:(NSData*)pps
-//{
-//    
-//    const char bytes[] = "\x00\x00\x00\x01";
-//    size_t length = (sizeof bytes) - 1; //string literals have implicit trailing '\0'
-//    NSData *ByteHeader = [NSData dataWithBytes:bytes length:length];
-//    [_videoEncodedData appendData:ByteHeader];
-//    [_videoEncodedData appendData:sps];
-//    [_videoEncodedData appendData:ByteHeader];
-//    [_videoEncodedData appendData:pps];
-//}
-//
-//#pragma mark
-//#pragma mark - 视频数据回调
-//- (void)gotEncodedData:(NSData*)data isKeyFrame:(BOOL)isKeyFrame
-//{
-//    NSLog(@"Video data (%lu): %@", (unsigned long)data.length, data.description);
-//    const char bytes[] = "\x00\x00\x00\x01";
-//    size_t length = (sizeof bytes) - 1; //string literals have implicit trailing '\0'
-//    NSData *ByteHeader = [NSData dataWithBytes:bytes length:length];
-//    
-//    [_videoEncodedData appendData:ByteHeader];
-//    [_videoEncodedData appendData:data];
-//
-//}
-
 -(void)dealloc
 {
-//    [h264Encoder End];
-    
+    [videoCamera stopCameraCapture];
 }
 
 @end
