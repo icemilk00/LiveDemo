@@ -13,8 +13,6 @@
 {
     VTCompressionSessionRef _videoCompressionSession;
     
-    VVLiveVideoConfiguration *_currentVideoEncodeConfig;
-    
     NSInteger frameCount;
     
     NSData *sps;

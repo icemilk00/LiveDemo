@@ -7,15 +7,14 @@
 //
 
 #import "LiveRecordViewController.h"
-#import "VVAudioEncoder.h"
+
 #import "VVLiveAudioConfiguration.h"
-#import "VVVideoEncoder.h"
 #import "VVLiveVideoConfiguration.h"
-#import "VVLiveRtmpSocket.h"
+#import "VVLiveSession.h"
 
-#define NOW (CACurrentMediaTime()*1000)
 
-@interface LiveRecordViewController () <VVVideoEncoderDelegate, VVAudioEncoderDelegate>
+
+@interface LiveRecordViewController ()
 {
     /*
     AVCaptureSession *_avSession;
@@ -26,72 +25,39 @@
     
     AVCaptureVideoPreviewLayer *_previewLayer;
      */
+    VVLiveSession *_session;
+    
     GPUImageVideoCamera *videoCamera;
-    VVVideoEncoder *videoEncoder;
     VVLiveVideoConfiguration *videoConfig;
-    VVAudioEncoder *audioEncoder;
-    VVLiveRtmpSocket *rtmpSocket;
-    
-    NSMutableData *_audioEncodedData;
-    NSMutableData *_videoEncodedData;
-    
-    dispatch_semaphore_t _timeSemaphore;
 }
 
-@property (nonatomic, strong) VVLiveRtmpSocket *rtmpSocket;
-
-@property (nonatomic, assign) uint64_t timestamp;
-@property (nonatomic, assign) BOOL isFirstFrame;
-@property (nonatomic, assign) uint64_t currentTimestamp;
 @end
 
 @implementation LiveRecordViewController
-@synthesize rtmpSocket;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-     _timeSemaphore = dispatch_semaphore_create(1);
-    self.timestamp = 0;
-    self.isFirstFrame = YES;
-    _audioEncodedData = [[NSMutableData alloc] init];
-    _videoEncodedData = [[NSMutableData alloc] init];
-    [self configRtmpSocket];
-    [self configVideoEncoder];
-    [self configAudioEncoder];
+
+    [self configLiveSession];
     [self configVideoCamera];
+    [_session start];
 }
 
--(void)configRtmpSocket
+-(void)configLiveSession
 {
-    rtmpSocket = [[VVLiveRtmpSocket alloc] init];
-    [rtmpSocket start];
-}
-
--(void)configVideoEncoder
-{
-    videoConfig = [VVLiveVideoConfiguration defaultConfigurationForQuality:VVLiveVideoQuality_Medium2];
+    _session = [[VVLiveSession alloc] initWithRtmpUrlStr:@"rtmp://192.168.16.156:5920/rtmplive/room"];
     
-    videoEncoder = [[VVVideoEncoder alloc] initWithConfig:videoConfig];
-    videoEncoder.delegate = self;
-
 }
-
--(void)configAudioEncoder
-{
-    audioEncoder = [[VVAudioEncoder alloc] init];
-    audioEncoder.delegate = self;
-}
-
 
 -(void)configVideoCamera
 {
-    videoCamera = [[GPUImageVideoCamera alloc] initWithSessionPreset:videoConfig.avSessionPreset cameraPosition:AVCaptureDevicePositionFront];
+    videoCamera = [[GPUImageVideoCamera alloc] initWithSessionPreset:[_session videoConfigure].avSessionPreset cameraPosition:AVCaptureDevicePositionFront];
     videoCamera.delegate = self;
-    videoCamera.outputImageOrientation = videoConfig.orientation;
+    videoCamera.outputImageOrientation = [_session videoConfigure].orientation;
     videoCamera.horizontallyMirrorFrontFacingCamera = NO;
     videoCamera.horizontallyMirrorRearFacingCamera = NO;
-    videoCamera.frameRate = (int32_t)videoConfig.videoFrameRate;
+    videoCamera.frameRate = (int32_t)[_session videoConfigure].videoFrameRate;
     
     GPUImageHighlightShadowFilter *customFilter = [[GPUImageHighlightShadowFilter alloc] init];
     GPUImageView *filteredVideoView = [[GPUImageView alloc] initWithFrame:self.view.bounds];
@@ -101,7 +67,6 @@
     
     [videoCamera addTarget:customFilter];
     [customFilter addTarget:filteredVideoView];
-    
     
     if(videoCamera.cameraPosition == AVCaptureDevicePositionFront) [filteredVideoView setInputRotation:kGPUImageFlipHorizonal atIndex:0];
     else [filteredVideoView setInputRotation:kGPUImageNoRotation atIndex:0];
@@ -117,38 +82,12 @@
 - (void)willOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer andType:(GPUImageMediaType)mediaType
 {
     if (mediaType == MediaTypeAudio) {
-        [audioEncoder encodeSampleBuffer:sampleBuffer timeStamp:self.currentTimestamp];
+        [_session audioEncodeWithSampBuffer:sampleBuffer];
     }
     else if (mediaType == MediaTypeVideo)
     {
-        [videoEncoder encodeSampleBuffer:sampleBuffer timeStamp:self.currentTimestamp];
+        [_session videoEncodeWithSampBuffer:sampleBuffer];
     }
-}
-
--(void)audioEncodeComplete:(VVAudioEncodeFrame *)encodeFrame
-{
-    [rtmpSocket sendFrame:encodeFrame];
-}
-
--(void)videoEncodeComplete:(VVVideoEncodeFrame *)encodeFrame
-{
-    [rtmpSocket sendFrame:encodeFrame];
-}
-
-- (uint64_t)currentTimestamp{
-    dispatch_semaphore_wait(_timeSemaphore, DISPATCH_TIME_FOREVER);
-    uint64_t currentts = 0;
-    if(_isFirstFrame == true) {
-        _timestamp = NOW;
-        _isFirstFrame = false;
-        currentts = 0;
-    }
-    else {
-        currentts = NOW - _timestamp;
-    }
-    _currentTimestamp = currentts;
-    dispatch_semaphore_signal(_timeSemaphore);
-    return _currentTimestamp;
 }
 
 -(void)dealloc

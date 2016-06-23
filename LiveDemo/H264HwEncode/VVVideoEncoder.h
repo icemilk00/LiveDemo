@@ -22,6 +22,8 @@
 
 @interface VVVideoEncoder : NSObject
 
+@property (nonatomic, strong) VVLiveVideoConfiguration *currentVideoEncodeConfig;
+
 -(id)initWithConfig:(VVLiveVideoConfiguration *)config;
 -(void)encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer timeStamp:(uint64_t)timeStamp;
 

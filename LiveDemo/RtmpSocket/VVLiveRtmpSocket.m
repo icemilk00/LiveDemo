@@ -16,18 +16,21 @@
 @interface VVLiveRtmpSocket()
 {
     RTMP *_rtmp;
-    BOOL _isSending;
-    BOOL _isFirstSendVideo;
-    BOOL _isFirstSendAudio;
+    
+    BOOL _hasSendFirstVideoFrame;
+    BOOL _hasSendFirstAudioFrame;
 
+    BOOL _isSending;
     BOOL _isConnected;
     BOOL _isConnecting;
     BOOL _isReconnecting;
+    
+    dispatch_semaphore_t _frameSortSemaphore;
 }
 
 @property (nonatomic, strong) dispatch_queue_t socketQueue;
-@property (nonatomic, strong) NSMutableArray *frameArray;
-@property (nonatomic, strong) NSMutableArray *sortFrameArray;
+@property (nonatomic, strong) NSMutableArray *frameBuffer;
+@property (nonatomic, strong) NSMutableArray *sortFrameBuffer;
 
 @property (nonatomic, strong) NSString *rtmpUrlStrl;
 
@@ -35,7 +38,7 @@
 
 @implementation VVLiveRtmpSocket
 
--(id)init
+-(id)initWithRtmpUrlStr:(NSString *)rtmpUrlStrl
 {
     self = [super init];
     if (self) {
@@ -44,11 +47,13 @@
         _isConnecting = NO;
         _isReconnecting = NO;
         
-        _isFirstSendVideo = NO;
-        _isFirstSendAudio = NO;
+        _hasSendFirstVideoFrame = NO;
+        _hasSendFirstAudioFrame = NO;
         
-        self.sortFrameArray = [[NSMutableArray alloc] init];
-        self.rtmpUrlStrl = @"rtmp://192.168.16.155:5920/rtmplive/room";
+        self.sortFrameBuffer = [[NSMutableArray alloc] init];
+        self.rtmpUrlStrl = rtmpUrlStrl;
+        
+        _frameSortSemaphore = dispatch_semaphore_create(1);
     }
     return self;
 }
@@ -128,37 +133,40 @@ Failed:
     _isReconnecting = NO;
     _isSending = NO;
     _isConnected = NO;
-    _isFirstSendVideo = NO;
-    _isFirstSendAudio = NO;
-    [self.frameArray removeAllObjects];
-    [self.sortFrameArray removeAllObjects];
+    _hasSendFirstVideoFrame = NO;
+    _hasSendFirstAudioFrame = NO;
+    
+    dispatch_semaphore_wait(_frameSortSemaphore, DISPATCH_TIME_FOREVER);
+    [self.frameBuffer removeAllObjects];
+    [self.sortFrameBuffer removeAllObjects];
+    dispatch_semaphore_signal(_frameSortSemaphore);
     
 }
 
 -(void)sendFrame
 {
-    if(!_isSending && self.frameArray.count > 0){
-        _isSending = YES;
+    if(!_isSending && self.frameBuffer.count > 0){
+
+        if(!_isConnected ||  _isReconnecting || _isConnecting || !_rtmp) return;
         
-//        if(!_isConnected ||  _isReconnecting || _isConnecting || !_rtmp) return;
-        
+         _isSending = YES;
         // 调用发送接口
         VVEncodeFrame *frame;
-        @synchronized(self.frameArray) {
-            frame = [self.frameArray firstObject];
-            [self.frameArray removeObjectAtIndex:0];
-        }
-        
+        dispatch_semaphore_wait(_frameSortSemaphore, DISPATCH_TIME_FOREVER);
+        frame = [self.frameBuffer firstObject];
+        [self.frameBuffer removeObjectAtIndex:0];
+        dispatch_semaphore_signal(_frameSortSemaphore);
+
         if([frame isKindOfClass:[VVVideoEncodeFrame class]]){
-            if(!_isFirstSendVideo){
-                _isFirstSendVideo = YES;
+            if(!_hasSendFirstVideoFrame){
+                _hasSendFirstVideoFrame = YES;
                 [self sendVideoHeader:(VVVideoEncodeFrame*)frame];
             }else{
                 [self sendVideo:(VVVideoEncodeFrame*)frame];
             }
         }else{
-            if(!_isFirstSendAudio){
-                _isFirstSendAudio = YES;
+            if(!_hasSendFirstAudioFrame){
+                _hasSendFirstAudioFrame = YES;
                 [self sendAudioHeader:(VVAudioEncodeFrame*)frame];
             }else{
                 [self sendAudio:(VVAudioEncodeFrame*)frame];
@@ -317,9 +325,11 @@ Failed:
         
         __strong typeof(_self) self = _self;
         if(!frame) return;
-        @synchronized(self.frameArray) {
-            [self appendObject:frame];
-        }
+        
+        dispatch_semaphore_wait(_frameSortSemaphore, DISPATCH_TIME_FOREVER);
+        [self appendObject:frame];
+        dispatch_semaphore_signal(_frameSortSemaphore);
+        
         [self sendFrame];
     });
 }
@@ -330,20 +340,20 @@ static const NSUInteger defaultSortBufferMaxCount = 10;///< 排序10个内
 - (void)appendObject:(VVEncodeFrame*)frame{
     if(!frame) return;
     
-    if(self.sortFrameArray.count < defaultSortBufferMaxCount){
-        [self.sortFrameArray addObject:frame];
+    if(self.sortFrameBuffer.count < defaultSortBufferMaxCount){
+        [self.sortFrameBuffer addObject:frame];
     }else{
         ///< 排序
-        [self.sortFrameArray addObject:frame];
-        NSArray *sortedSendQuery = [self.sortFrameArray sortedArrayUsingFunction:frameDataCompare context:NULL];
-        [self.sortFrameArray removeAllObjects];
-        [self.sortFrameArray addObjectsFromArray:sortedSendQuery];
+        [self.sortFrameBuffer addObject:frame];
+        NSArray *sortedSendQuery = [self.sortFrameBuffer sortedArrayUsingFunction:frameDataCompare context:NULL];
+        [self.sortFrameBuffer removeAllObjects];
+        [self.sortFrameBuffer addObjectsFromArray:sortedSendQuery];
         /// 丢帧
 //        [self removeExpireFrame];
         /// 添加至缓冲区
-        VVEncodeFrame *firstFrame = [self.sortFrameArray firstObject];
-        [self.sortFrameArray removeObjectAtIndex:0];
-        if(firstFrame) [self.frameArray addObject:firstFrame];
+        VVEncodeFrame *firstFrame = [self.sortFrameBuffer firstObject];
+        [self.sortFrameBuffer removeObjectAtIndex:0];
+        if(firstFrame) [self.frameBuffer addObject:firstFrame];
     }
 }
 
@@ -366,12 +376,12 @@ NSInteger frameDataCompare(id obj1, id obj2, void *context){
     return _socketQueue;
 }
 
--(NSMutableArray *)frameArray
+-(NSMutableArray *)frameBuffer
 {
-    if (!_frameArray) {
-        _frameArray = [[NSMutableArray alloc] init];
+    if (!_frameBuffer) {
+        _frameBuffer = [[NSMutableArray alloc] init];
     }
-    return _frameArray;
+    return _frameBuffer;
 }
 
 #pragma mark - other

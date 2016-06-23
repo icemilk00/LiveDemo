@@ -11,7 +11,10 @@
 
 @interface VVLiveRtmpSocket : NSObject
 
+-(id)initWithRtmpUrlStr:(NSString *)rtmpUrlStrl;
+
 -(void)start;
+-(void)stop;
 -(void)sendFrame:(VVEncodeFrame *)frame;
 
 @end

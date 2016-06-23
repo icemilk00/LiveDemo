@@ -25,15 +25,28 @@
 
 -(id)init
 {
-    self = [super init];
+    self = [self initWithConfig:[VVLiveAudioConfiguration defaultConfiguration]];
     if (self) {
 
+        
+    }
+    return self;
+}
+
+-(id)initWithConfig:(VVLiveAudioConfiguration *)config
+{
+    self = [super init];
+    if (self) {
+        
         _pcmBufferSize = 0;
         _pcmBuffer = NULL;
         
         _aacBufferSize = 1024;
         _aacBuffer = malloc(_aacBufferSize * sizeof(uint8_t));
         memset(_aacBuffer, 0, _aacBufferSize);
+        
+        _currentAudioEncodeConfig = config;
+        
     }
     return self;
 }
@@ -60,7 +73,7 @@
     //每个数据帧中的字节，
     outputAudioStreamDescription.mBytesPerFrame = 0;
     // 1:单声道；2:立体声,不能为0
-    outputAudioStreamDescription.mChannelsPerFrame = 1;
+    outputAudioStreamDescription.mChannelsPerFrame = 1;//(UInt32)_currentAudioEncodeConfig.numberOfChannels;
     // 每个数据帧中每个通道样本的位数
     outputAudioStreamDescription.mBitsPerChannel = 0;
     outputAudioStreamDescription.mReserved = 0;
